@@ -1,13 +1,11 @@
-
 <template>
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
     <div class="container">
       <!-- LOGO -->
       <router-link class="navbar-brand" to="/">
-        <!-- <img :src="logo" alt="Logo" style="width: 150px" /> -->
+        NewsApp
       </router-link>
 
-      <!-- TOGGLER -->
       <button
         class="navbar-toggler"
         type="button"
@@ -17,8 +15,8 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- MENU -->
       <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <!-- MENU TRÁI -->
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <router-link class="nav-link" to="/">
@@ -26,69 +24,79 @@
             </router-link>
           </li>
 
-          <li class="nav-item">
-            <router-link class="nav-link" to="/video">
-              <i class="fa-solid fa-film"></i> Video
+          <!-- CHỈ HIỆN KHI ĐÃ ĐĂNG NHẬP -->
+          <li class="nav-item" v-if="user">
+            <router-link class="nav-link" to="/create">
+              <i class="fa-solid fa-pen"></i> Đăng bài
             </router-link>
           </li>
+        </ul>
 
-          <li class="nav-item">
-            <router-link class="nav-link" to="/about">
-              <i class="fa-solid fa-circle-info"></i> Giới thiệu
-            </router-link>
-          </li>
+        <!-- MENU PHẢI -->
+        <ul class="navbar-nav">
+          <!-- CHƯA ĐĂNG NHẬP -->
+          <template v-if="!user">
+            <li class="nav-item">
+              <router-link class="nav-link" to="/login">
+                Đăng nhập
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/register">
+                Đăng ký
+              </router-link>
+            </li>
+          </template>
 
-          <li class="nav-item">
-            <router-link class="nav-link" to="/event">
-              <i class="fa-solid fa-calendar-days"></i> Sự kiện
-            </router-link>
-          </li>
-
-          <!-- DROPDOWN TÀI KHOẢN -->
-          <li class="nav-item dropdown">
+          <!-- ĐÃ ĐĂNG NHẬP -->
+          <li class="nav-item dropdown" v-else>
             <a
               class="nav-link dropdown-toggle"
               href="#"
               role="button"
               data-bs-toggle="dropdown"
             >
-              <i class="fa-solid fa-user"></i> Tài khoản
+              <i class="fa-solid fa-user"></i> {{ user.name }}
             </a>
 
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <router-link class="dropdown-item" to="/login">
-                  Đăng nhập
+                <router-link class="dropdown-item" to="/profile">
+                  Trang cá nhân
                 </router-link>
               </li>
               <li>
-                <router-link class="dropdown-item" to="/forgot-password">
-                  Quên mật khẩu
+                <router-link class="dropdown-item" to="/create">
+                  Đăng bài viết
                 </router-link>
               </li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
-                <router-link class="dropdown-item" to="/register">
-                  Đăng ký thành viên
-                </router-link>
+                <button class="dropdown-item text-danger" @click="logout">
+                  Đăng xuất
+                </button>
               </li>
             </ul>
-          </li>
-        </ul>
-
-        <!-- NGÔN NGỮ -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Tiếng Việt</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Tiếng Anh</a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 </template>
-
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const user = ref(null)
+
+onMounted(() => {
+  user.value = JSON.parse(localStorage.getItem('currentUser'))
+})
+
+const logout = () => {
+  localStorage.removeItem('currentUser')
+  user.value = null
+  router.push('/login')
+}
 </script>

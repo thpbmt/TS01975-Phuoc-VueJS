@@ -16,29 +16,30 @@
             <!-- AVATAR -->
             <div class="col-md-4 text-center border-end">
               <img
-                src="https://via.placeholder.com/150"
+                :src="avatar"
                 class="rounded-circle mb-3"
                 style="width: 150px; height: 150px; object-fit: cover"
-                alt="Avatar"
               />
 
-              <div class="mb-3">
-                <input type="file" class="form-control" />
-              </div>
+              <input
+                type="file"
+                class="form-control mb-2"
+                @change="handleAvatar"
+              />
 
               <span class="badge bg-success">Đang hoạt động</span>
             </div>
 
-            <!-- FORM INFO -->
+            <!-- FORM -->
             <div class="col-md-8">
-              <form>
+              <form @submit.prevent="updateProfile">
                 <!-- Họ tên -->
                 <div class="mb-3">
                   <label class="form-label fw-bold">Họ và tên</label>
                   <input
                     type="text"
                     class="form-control"
-                    value="Nguyễn Văn A"
+                    v-model="name"
                   />
                 </div>
 
@@ -48,7 +49,7 @@
                   <input
                     type="email"
                     class="form-control"
-                    value="vana@gmail.com"
+                    v-model="email"
                   />
                 </div>
 
@@ -58,17 +59,7 @@
                   <input
                     type="password"
                     class="form-control"
-                    placeholder="Nhập mật khẩu mới"
-                  />
-                </div>
-
-                <!-- Xác nhận mật khẩu -->
-                <div class="mb-3">
-                  <label class="form-label fw-bold">Xác nhận mật khẩu</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    placeholder="Nhập lại mật khẩu"
+                    v-model="password"
                   />
                 </div>
 
@@ -87,12 +78,66 @@
         </div>
 
         <!-- FOOTER -->
-        <div class="card-footer text-muted">
-          <small>
-            Bạn có thể cập nhật thông tin cá nhân và ảnh đại diện tại đây.
-          </small>
+        <div class="card-footer text-muted text-center">
+          Chỉnh sửa thông tin cá nhân
         </div>
       </div>
     </div>
   </div>
 </template>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const avatar = ref('https://via.placeholder.com/150')
+
+onMounted(() => {
+  if (!currentUser) {
+    alert('Vui lòng đăng nhập')
+    router.push('/login')
+    return
+  }
+
+  name.value = currentUser.name
+  email.value = currentUser.email
+  avatar.value = currentUser.avatar || avatar.value
+})
+
+const handleAvatar = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    avatar.value = reader.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const updateProfile = () => {
+  const users = JSON.parse(localStorage.getItem('users')) || []
+
+  const index = users.findIndex(u => u.id === currentUser.id)
+  if (index === -1) return
+
+  users[index].name = name.value
+  users[index].email = email.value
+  users[index].avatar = avatar.value
+
+  if (password.value) {
+    users[index].password = password.value
+  }
+
+  localStorage.setItem('users', JSON.stringify(users))
+  localStorage.setItem('currentUser', JSON.stringify(users[index]))
+
+  alert('Cập nhật thông tin thành công')
+}
+</script>
